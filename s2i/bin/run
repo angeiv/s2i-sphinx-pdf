@@ -1,0 +1,31 @@
+#!/bin/bash -e
+#
+# S2I run script for the 'sphinx-pdf' image.
+# The run script executes the server that runs your application.
+#
+# For more information see the documentation:
+#	https://github.com/openshift/source-to-image/blob/master/docs/builder_image.md
+#
+
+# set default value for context path
+: ${CONTEXT_PATH:=/}
+
+# make context path reachable
+cd ..
+BASE_DIR=$(pwd -P)
+WWW_DIR=$(dirname "${BASE_DIR}/www/${CONTEXT_PATH}")
+mkdir -p "${WWW_DIR}"
+ln -s ${BASE_DIR}/build "${WWW_DIR}/$(basename "${BASE_DIR}/www/${CONTEXT_PATH}")"
+cd ${BASE_DIR}/www
+
+# if there are arguments supplied we expect the first arg to be a command to be run
+if [ $# -gt 0 ];then
+  echo "Executing command $@"
+  exec "$@"
+else
+  if [[ -f /usr/bin/python3 ]]; then
+    exec python3 -m http.server 8080
+  else
+    exec python -m SimpleHTTPServer 8080
+  fi
+fi

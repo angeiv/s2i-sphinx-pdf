@@ -1,0 +1,59 @@
+#!/bin/bash -e
+#
+# S2I assemble script for the 'sphinx-pdf' image.
+# The 'assemble' script builds your application source so that it is ready to run.
+#
+# For more information refer to the documentation:
+#	https://github.com/openshift/source-to-image/blob/master/docs/builder_image.md
+#
+
+# If the 'sphinx-pdf' assemble script is executed with the '-h' flag, print the usage.
+if [[ "$1" == "-h" ]]; then
+	exec /usr/libexec/s2i/usage
+fi
+
+# Restore artifacts from the previous build (if they exist).
+#
+if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
+  echo "---> Restoring build artifacts..."
+  mv /tmp/artifacts/. ./
+fi
+
+echo "---> Installing application source..."
+cp -Rf /tmp/src/. ./
+
+echo "---> Building application from source..."
+if [[ -f requirements.txt ]]; then
+  if [ -n "$PIP_INDEX_URL" ]; then
+    echo "---> Installing dependencies via $PIP_INDEX_URL ..."
+  else
+    echo "---> Installing dependencies ..."
+  fi
+  export PATH=$HOME/.local/bin:$PATH
+  if [[ -f /usr/bin/pip3 ]]; then
+    pip3 install --user -r requirements.txt
+  else
+    pip install --user -r requirements.txt
+  fi
+fi
+
+if [[ -f Makefile ]]; then
+  echo "---> Installing application ..."
+  SPHINXBUILD=sphinx-build
+  [[ -f .local/bin/sphinx-build ]] && SPHINXBUILD=.local/bin/sphinx-build
+  make SPHINXBUILD=${SPHINXBUILD} BUILDDIR=../ ${MAKE_TARGET}
+
+  # copy all to a known fixed named dir
+  mkdir -p ../build
+  mv ../latex/*.pdf ../build
+fi
+
+echo "---> Clean build cache ..."
+rm -rf .cache .local ../doctrees ../${MAKE_TARGET} ./*
+# remove pip temporary directory
+rm -rf /tmp/pip_build_default
+
+# Fix source directory permissions
+fix-permissions ./
+# set permissions for any installed artifacts
+fix-permissions /opt/app-root
