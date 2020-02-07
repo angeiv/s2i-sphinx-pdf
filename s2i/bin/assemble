@@ -29,7 +29,6 @@ if [[ -f requirements.txt ]]; then
   else
     echo "---> Installing dependencies ..."
   fi
-  export PATH=$HOME/.local/bin:$PATH
   if [[ -f /usr/bin/pip3 ]]; then
     pip3 install --user -r requirements.txt
   else
@@ -39,9 +38,7 @@ fi
 
 if [[ -f Makefile ]]; then
   echo "---> Installing application ..."
-  SPHINXBUILD=sphinx-build
-  [[ -f .local/bin/sphinx-build ]] && SPHINXBUILD=.local/bin/sphinx-build
-  make SPHINXBUILD=${SPHINXBUILD} BUILDDIR=../ ${MAKE_TARGET}
+  make BUILDDIR=../ ${MAKE_TARGET}
 
   # copy all to a known fixed named dir
   mkdir -p ../build

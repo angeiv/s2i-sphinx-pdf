@@ -10,7 +10,7 @@ ENV \
     APP_ROOT=/opt/app-root \
     # The $HOME is not set by default, but some applications needs this variable
     HOME=/opt/app-root/src \
-    PATH=/opt/app-root/src/bin:/opt/app-root/bin:$PATH \
+    PATH=/opt/app-root/src/bin:/opt/app-root/bin:/opt/app-root/src/.local/bin:$PATH \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
@@ -29,9 +29,7 @@ RUN apt-get update && \
         git \
         make \
         fontconfig \
-        python-pip \
-        python-setuptools \
-        python-wheel \
+        python3-pip \
         latexmk \
         texlive-xetex \
         texlive-fonts-recommended && \
