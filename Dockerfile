@@ -30,6 +30,8 @@ RUN apt-get update && \
         make \
         fontconfig \
         python3-pip \
+        python3-setuptools \
+        python3-wheel \
         latexmk \
         texlive-xetex \
         texlive-fonts-recommended && \
